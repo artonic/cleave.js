@@ -59,12 +59,13 @@ var CreditCardDetector = {
         unionPay: /^(62|81)\d{0,14}/
     },
 
-    getStrictBlocks: function (block) {
+    getStrictBlocks: function (block, value) {
       var total = block.reduce(function (prev, current) {
         return prev + current;
       }, 0);
 
-      return block.concat(19 - total);
+      var rest = value.length - total;
+      return block.concat(new Array(Math.ceil(rest / 4)).map(() => 4));
     },
 
     getInfo: function (value, strictMode) {
@@ -82,14 +83,14 @@ var CreditCardDetector = {
                 var matchedBlocks = blocks[key];
                 return {
                     type: key,
-                    blocks: strictMode ? this.getStrictBlocks(matchedBlocks) : matchedBlocks
+                    blocks: strictMode ? this.getStrictBlocks(matchedBlocks, value) : matchedBlocks
                 };
             }
         }
 
         return {
             type: 'unknown',
-            blocks: strictMode ? this.getStrictBlocks(blocks.general) : blocks.general
+            blocks: strictMode ? this.getStrictBlocks(blocks.general, value) : blocks.general
         };
     }
 };
